@@ -1,0 +1,60 @@
+public class Sana extends AdvancedRobot {
+
+    // Variáveis para controlar o poder da fumaça
+    private double power = 30; // Poder inicial da fumaça
+    private double powerIncrease = 1; // Aumento de poder por dano recebido
+
+    public Sana() {
+        // Definir a cor do robô
+        setBodyColor(Color.pink);
+    }
+
+    public void run() {
+        // Rotação constante do radar para identificar inimigos
+        setTurnRadarRight(45);
+
+        while (true) {
+            // Verificar se há inimigos próximos
+            ScanResult[] scanResults = getScanResults();
+            if (scanResults.length > 0) {
+                // Obter o inimigo mais próximo
+                ScanResult closestEnemy = scanResults[0];
+
+                // Apontar o canhão para o inimigo
+                double angleToEnemy = getHeading() + closestEnemy.getBearing();
+                setTurnGunRightRadians(normalizeAngle(angleToEnemy - getGunHeadingRadians()));
+
+                // Ajustar o poder da fumaça com base no dano recebido
+                power += getEnergy() - 100;
+                power = Math.max(power, 30); // Limitar o poder mínimo
+
+                // Disparar a fumaça
+                fire(power);
+
+                // Mover para frente e para trás para dificultar a mira do inimigo
+                if (randomInt(2) == 0) {
+                    ahead(100);
+                } else {
+                    back(100);
+                }
+            } else {
+                // Girar o radar para continuar buscando inimigos
+                setTurnRadarRight(45);
+            }
+
+            // Executar ações a cada turno
+            execute();
+        }
+    }
+
+    // Função para normalizar o ângulo entre -180 e 180 graus
+    private double normalizeAngle(double angle) {
+        while (angle < -180) {
+            angle += 360;
+        }
+        while (angle > 180) {
+            angle -= 360;
+        }
+        return angle;
+    }
+}

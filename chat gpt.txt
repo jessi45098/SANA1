@@ -1,0 +1,48 @@
+public class SanaRobot extends AdvancedRobot {
+    
+    boolean isSmoking = false; // Variável para controlar se está soltando fumaça ou não
+    int damageTaken = 0; // Variável para armazenar o dano recebido
+    
+    public void run() {
+        setColors(java.awt.Color.pink, java.awt.Color.white, java.awt.Color.white); // Define as cores do robô
+        while (true) {
+            // Lógica de movimento do robô (exemplo simples)
+            ahead(100);
+            turnGunRight(360);
+            back(100);
+            turnGunRight(360);
+        }
+    }
+    
+    public void onScannedRobot(ScannedRobotEvent e) {
+        // Ajusta o radar para mirar no adversário
+        turnGunRight(getHeading() - getGunHeading() + e.getBearing());
+        
+        // Verifica se está na hora de atirar
+        if (getGunHeat() == 0 && Math.abs(getGunTurnRemaining()) < 10) {
+            // Atira na direção do adversário
+            fire(3);
+        }
+    }
+    
+    public void onHitByBullet(HitByBulletEvent e) {
+        // Aumenta o dano recebido
+        damageTaken += e.getBullet().getPower() * 10;
+        
+        // Ativa a fumaça se não estiver ativa
+        if (!isSmoking) {
+            isSmoking = true;
+            setTurnGunRight(90);
+            setTurnRadarRight(90);
+            setScanColor(java.awt.Color.white); // Cor branca para indicar que está soltando fumaça
+        }
+        
+        // Ajusta a força do tiro baseado no dano recebido
+        setFire(2 + (damageTaken / 100)); // Exemplo simples de ajuste da força do tiro
+    }
+    
+    public void onHitWall(HitWallEvent e) {
+        // Inverte a direção ao bater na parede
+        turnRight(90);
+    }
+}
